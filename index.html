@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Security Escape Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0f0f23, #1e1e3f, #2d2d5f);
+            color: #00ff41;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: hackerglow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes hackerglow {
+            from { text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41; }
+            to { text-shadow: 0 0 20px #00ff41, 0 0 30px #00ff41, 0 0 40px #ff0040; }
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .sidebar {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff0040;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(255, 0, 64, 0.3);
+        }
+
+        .level {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(30, 30, 63, 0.6);
+            border-radius: 8px;
+            border-left: 4px solid #00ff41;
+            display: none;
+        }
+
+        .level.active {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .level h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .terminal {
+            background: #000;
+            color: #00ff41;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            border: 1px solid #00ff41;
+        }
+
+        .terminal-prompt::before {
+            content: "root@hackbox:~$ ";
+            color: #ff0040;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff41;
+            border-radius: 5px;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .input-field:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+            background: rgba(0, 50, 0, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ff41, #00cc33);
+            border: none;
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #00cc33, #009922);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 65, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff0040, #cc0033);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(45deg, #cc0033, #990022);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 64, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #ffaa00, #cc8800);
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(45deg, #cc8800, #996600);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 170, 0, 0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff41;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff41, #00cc33);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 64, 0.2);
+            border: 1px solid #ff0040;
+            color: #ff0040;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .vulnerability-box {
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px dashed #ff0040;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .security-tip {
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00ff41;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .timer {
+            font-size: 2em;
+            text-align: center;
+            color: #ff0040;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .hacker-stats {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff41;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .completion-screen {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(45deg, #00ff41, #00cc33);
+            color: #000;
+            border-radius: 10px;
+            animation: celebration 2s ease-in-out;
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .fake-cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #333;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .cookie-buttons {
+            margin-top: 10px;
+        }
+
+        .ascii-art {
+            font-family: monospace;
+            white-space: pre;
+            color: #00ff41;
+            font-size: 0.8em;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .hint-counter {
+            background: rgba(255, 170, 0, 0.2);
+            border: 1px solid #ffaa00;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            color: #ffaa00;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 CYBER SECURITY ESCAPE CHALLENGE 🔒</h1>
+            <p>Learn cybersecurity while having fun! (And try not to get pwned)</p>
+        </div>
+
+        <div class="game-area">
+            <div class="main-content">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <!-- Level 1: Password Security -->
+                <div class="level active" id="level1">
+                    <h3>🔐 Level 1: Password Pandemonium</h3>
+                    <div class="ascii-art">
+    ╔═══════════════════════════════╗
+    ║     WELCOME TO HACKERCORP     ║
+    ║   "We take security serious"  ║
+    ╚═══════════════════════════════╝
+                    </div>
+                    <p>You've infiltrated HackerCorp's system! But first, you need to crack their "ultra-secure" login.</p>
+                    <div class="terminal">
+                        <div>Login System v1.0 (Totally Secure™)</div>
+                        <div>Username: admin</div>
+                        <div>Password: <span style="color: #555;">●●●●●●●●●●●●</span></div>
+                        <div style="color: #666; font-size: 0.8em;">Hint: CEO's favorite word + birth year</div>
+                        <div style="color: #666; font-size: 0.8em;">Post-it note on monitor: "password123"</div>
+                    </div>
+                    <p>What's the password? (This is embarrassingly easy...)</p>
+                    <input type="password" class="input-field" id="passwordAnswer" placeholder="Enter the password...">
+                    <button class="btn" onclick="checkPassword()">HACK IN</button>
+                    <div class="error-message" id="passwordError">Access Denied! Try reading the sticky note again... 📝</div>
+                    <div class="success-message" id="passwordSuccess">🎉 You're in! (Seriously, who uses 'password123'?)</div>
+                </div>
+
+                <!-- Level 2: SQL Injection -->
+                <div class="level" id="level2">
+                    <h3>💉 Level 2: SQL Injection Station</h3>
+                    <p>Great! Now you're in their user database search. Time to find some secrets...</p>
+                    <div class="terminal">
+                        <div class="terminal-prompt">SELECT * FROM users WHERE name = '</div>
+                        <input type="text" class="input-field" id="sqlInput" placeholder="Enter username to search..." style="display: inline-block; width: 300px;">
+                        <div>'; -- This will close the query</div>
+                    </div>
+                    <div class="vulnerability-box">
+                        <strong>🚨 Vulnerability Alert!</strong><br>
+                        This search box is vulnerable to SQL injection. Try entering something that breaks out of the query...
+                        <br><br>
+                        <em>Hint: What if you ended the string early and added your own SQL?</em>
+                    </div>
+                    <button class="btn" onclick="checkSQL()">SEARCH DATABASE</button>
+                    <div class="error-message" id="sqlError">Invalid query! Try breaking out of the string... Think: ' OR '1'='1</div>
+                    <div class="success-message" id="sqlSuccess">💀 SQL Injection successful! You've dumped the entire user table!</div>
+                </div>
+
+                <!-- Level 3: Social Engineering -->
+                <div class="level" id="level3">
+                    <h3>📞 Level 3: Social Engineering Shenanigans</h3>
+                    <p>Time to call the help desk and trick them into giving you admin access!</p>
+                    <div class="terminal">
+                        <div style="color: #ffff00;">📞 Calling IT Help Desk...</div>
+                        <div>"Hello, this is Dave from IT. How can I help you?"</div>
+                        <div style="color: #888;">Choose your social engineering approach:</div>
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <button class="btn" onclick="socialChoice('urgent')">🚨 "This is URGENT! CEO needs access NOW!"</button><br>
+                        <button class="btn" onclick="socialChoice('authority')">👔 "I'm from corporate security, give me admin access"</button><br>
+                        <button class="btn" onclick="socialChoice('friendly')">😊 "Hey buddy, can you help me reset my password?"</button><br>
+                        <button class="btn" onclick="socialChoice('technical')">🤓 "I need to run a penetration test, need elevated privileges"</button>
+                    </div>
+                    <div class="error-message" id="socialError">Dave is suspicious! "I need to verify your identity first..."</div>
+                    <div class="success-message" id="socialSuccess">🎭 Success! Dave says: "Oh sure, here's the admin token: SOCIAL_MASTER_2024"</div>
+                </div>
+
+                <!-- Level 4: Cookie Manipulation -->
+                <div class="level" id="level4">
+                    <h3>🍪 Level 4: Cookie Monster's Revenge</h3>
+                    <p>You've found the secret admin panel, but it's checking your session cookie...</p>
+                    <div class="terminal">
+                        <div>Current Session Cookie:</div>
+                        <div style="background: #222; padding: 10px; margin: 10px 0; border-radius: 3px;">
+                            sessionId=user123; role=<span id="cookieRole" style="color: #ff0040;">guest</span>; authenticated=false
+                        </div>
+                        <div>Access Level: <span style="color: #ff0040;">DENIED</span></div>
+                    </div>
+                    <div class="vulnerability-box">
+                        <strong>🍪 Cookie Vulnerability!</strong><br>
+                        The website trusts whatever role is in your cookie. What happens if you change it?
+                    </div>
+                    <p>What should the 'role' value be to gain admin access?</p>
+                    <input type="text" class="input-field" id="cookieAnswer" placeholder="Enter the role you want...">
+                    <button class="btn" onclick="checkCookie()">MODIFY COOKIE</button>
+                    <div class="error-message" id="cookieError">Still blocked! Try a more administrative role... 👑</div>
+                    <div class="success-message" id="cookieSuccess">🍪 Cookie modified! Welcome, admin! Access granted!</div>
+                </div>
+
+                <!-- Level 5: Final Challenge -->
+                <div class="level" id="level5">
+                    <h3>🏆 Final Challenge: The Master Backdoor</h3>
+                    <p>You've reached the vault! But there's one last security check...</p>
+                    <div class="ascii-art">
+    ┌─────────────────────────────────┐
+    │    🔐 ULTRA SECURE VAULT 🔐    │
+    │                                 │
+    │  Enter the master key to        │
+    │  complete your cyber mission    │
+    └─────────────────────────────────┘
+                    </div>
+                    <p>Combine all the tokens you've collected:</p>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>Password from Level 1</li>
+                        <li>SQL injection result</li>
+                        <li>Social engineering token</li>
+                        <li>Cookie admin role</li>
+                    </ul>
+                    <input type="text" class="input-field" id="finalAnswer" placeholder="Enter combined master key...">
+                    <button class="btn" onclick="checkFinal()">UNLOCK VAULT</button>
+                    <div class="error-message" id="finalError">Access denied! Check your collected tokens...</div>
+                </div>
+
+                <div class="completion-screen" id="completionScreen">
+                    <h2>🎉 CONGRATULATIONS, HACKER! 🎉</h2>
+                    <div class="ascii-art">
+    ███╗   ███╗██╗███████╗███████╗██╗ ██████╗ ███╗   ██╗
+    ████╗ ████║██║██╔════╝██╔════╝██║██╔═══██╗████╗  ██║
+    ██╔████╔██║██║███████╗███████╗██║██║   ██║██╔██╗ ██║
+    ██║╚██╔╝██║██║╚════██║╚════██║██║██║   ██║██║╚██╗██║
+    ██║ ╚═╝ ██║██║███████║███████║██║╚██████╔╝██║ ╚████║
+    ╚═╝     ╚═╝╚═╝╚══════╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+                        ACCOMPLISHED!
+                    </div>
+                    <p>You've successfully completed the Cyber Security Escape Challenge!</p>
+                    <p><strong>Security lessons learned:</strong></p>
+                    <div style="text-align: left; margin: 20px 0;">
+                        ✅ Never use simple passwords like "password123"<br>
+                        ✅ Always sanitize user input to prevent SQL injection<br>
+                        ✅ Verify caller identity before giving access<br>
+                        ✅ Never trust client-side data like cookies<br>
+                        ✅ Security is only as strong as the weakest link!
+                    </div>
+                    <button class="btn" onclick="resetGame()">HACK AGAIN</button>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="timer" id="timer">∞</div>
+                
+                <div class="hacker-stats">
+                    <h4>🎯 Hacker Stats</h4>
+                    <div id="statsDisplay">
+                        <div>Levels Cleared: <span id="levelsCleared">0</span>/5</div>
+                        <div>Vulnerabilities Found: <span id="vulnsFound">0</span></div>
+                        <div>Security Score: <span id="securityScore">ROOKIE</span></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h4>🎒 Collected Tokens</h4>
+                    <div id="tokensList" style="font-size: 0.9em; color: #ccc; margin-top: 10px;">
+                        No tokens collected yet...
+                    </div>
+                </div>
+
+                <div class="security-tip" style="margin-top: 20px;">
+                    <h4>💡 Security Tip</h4>
+                    <div id="currentTip">
+                        Start by examining the obvious security flaws...
+                    </div>
+                </div>
+
+                <div class="hint-counter" id="hintCounter">
+                    🔍 Intelligence Requests Remaining: <span id="hintsLeft">2</span>/2
+                </div>
+                <button class="btn-warning" onclick="showHint()" style="width: 100%; margin-top: 10px;" id="hintButton">🔍 REQUEST INTEL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fake Cookie Banner for Level 4 -->
+    <div class="fake-cookie-banner" id="cookieBanner" style="display: none;">
+        <div>🍪 This website uses cookies to track everything about you! Accept or we'll make your life difficult.</div>
+        <div class="cookie-buttons">
+            <button class="btn" onclick="hideCookieBanner()">Accept All (and surrender your privacy)</button>
+            <button class="btn-danger" onclick="hideCookieBanner()">Decline (good luck with that)</button>
+        </div>
+    </div>
+
+    <script>
+        let currentLevel = 1;
+        let gameActive = true;
+        let tokens = [];
+        let levelsCompleted = 0;
+        let vulnerabilitiesFound = 0;
+        let hintsUsed = 0;
+        let maxHints = 2;
+        
+        const hints = {
+            1: "Physical security matters! Look around the workspace for information employees might leave visible. Research: 'sticky note password security'",
+            2: "SQL queries expect specific syntax. Research 'SQL injection basics' and look for ways to manipulate boolean logic in WHERE clauses.",
+            3: "Social engineering relies on authority and urgency. Research 'pretexting techniques' - which approach sounds most authoritative?",
+            4: "Client-side data can be manipulated. Research 'cookie manipulation attacks' and think about what role would grant highest privileges.",
+            5: "Combine your collected intelligence in sequence. Check your token list - what order did you collect them in?"
+        };
+
+        const securityTips = {
+            1: "Never write passwords on sticky notes! Use a password manager instead.",
+            2: "Always use parameterized queries to prevent SQL injection attacks.",
+            3: "Always verify caller identity through multiple channels before granting access.",
+            4: "Never trust client-side data - always validate on the server side.",
+            5: "Implement multi-factor authentication and principle of least privilege."
+        };
+
+        function updateStats() {
+            document.getElementById('levelsCleared').textContent = levelsCompleted;
+            document.getElementById('vulnsFound').textContent = vulnerabilitiesFound;
+            
+            let score = 'ROOKIE';
+            if (levelsCompleted >= 5) score = 'ELITE HACKER';
+            else if (levelsCompleted >= 3) score = 'SCRIPT KIDDIE';
+            else if (levelsCompleted >= 1) score = 'NOOB HACKER';
+            
+            document.getElementById('securityScore').textContent = score;
+        }
+
+        function updateProgress() {
+            const progress = (levelsCompleted / 5) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function updateHintCounter() {
+            const remaining = maxHints - hintsUsed;
+            document.getElementById('hintsLeft').textContent = remaining;
+            
+            if (remaining <= 0) {
+                document.getElementById('hintButton').disabled = true;
+                document.getElementById('hintButton').textContent = '🚫 NO INTEL LEFT';
+                document.getElementById('hintButton').style.opacity = '0.5';
+            }
+        }
+
+        function addToken(token) {
+            tokens.push(token);
+            const tokenDiv = document.getElementById('tokensList');
+            if (tokens.length === 1) {
+                tokenDiv.innerHTML = '';
+            }
+            tokenDiv.innerHTML += `<div style="color: #00ff41;">🔑 ${token}</div>`;
+        }
+
+        function updateSecurityTip(level) {
+            document.getElementById('currentTip').textContent = securityTips[level];
+        }
+
+        function nextLevel() {
+            document.getElementById(`level${currentLevel}`).classList.remove('active');
+            currentLevel++;
+            
+            if (currentLevel <= 5) {
+                document.getElementById(`level${currentLevel}`).classList.add('active');
+                updateSecurityTip(currentLevel);
+                
+                if (currentLevel === 4) {
+                    // Show fake cookie banner for level 4
+                    document.getElementById('cookieBanner').style.display = 'block';
+                }
+            }
+        }
+
+        function showHint() {
+            if (hintsUsed >= maxHints) {
+                alert('⚠️ No intelligence requests remaining! You must proceed without assistance, operative.');
+                return;
+            }
+            
+            hintsUsed++;
+            updateHintCounter();
+            
+            alert(`🔍 INTELLIGENCE BRIEFING - Level ${currentLevel}:\n\n${hints[currentLevel]}\n\n[${hintsUsed}/${maxHints} intel requests used]`);
+        }
+
+        function checkPassword() {
+            const answer = document.getElementById('passwordAnswer').value.toLowerCase();
+            
+            if (answer === 'password123') {
+                document.getElementById('passwordSuccess').style.display = 'block';
+                document.getElementById('passwordError').style.display = 'none';
+                addToken('password123');
+                levelsCompleted++;
+                vulnerabilitiesFound++;
+                updateStats();
+                updateProgress();
+                setTimeout(() => {
+                    nextLevel();
+                }, 2000);
+            } else {
+                document.getElementById('passwordError').style.display = 'block';
+                document.getElementById('passwordSuccess').style.display = 'none';
+            }
+        }
+
+        function checkSQL() {
+            const input = document.getElementById('sqlInput').value.toLowerCase();
+            
+            if (input.includes("' or '1'='1") || input.includes("' or 1=1") || input.includes("'; --")) {
+                document.getElementById('sqlSuccess').style.display = 'block';
+                document.getElementById('sqlError').style.display = 'none';
+                addToken('dump');
+                levelsCompleted++;
+                vulnerabilitiesFound++;
+                updateStats();
+                updateProgress();
+                setTimeout(() => {
+                    nextLevel();
+                }, 2000);
+            } else {
+                document.getElementById('sqlError').style.display = 'block';
+                document.getElementById('sqlSuccess').style.display = 'none';
+            }
+        }
+
+        function socialChoice(choice) {
+            if (choice === 'authority') {
+                document.getElementById('socialSuccess').style.display = 'block';
+                document.getElementById('socialError').style.display = 'none';
+                addToken('SOCIAL_MASTER_2024');
+                levelsCompleted++;
+                vulnerabilitiesFound++;
+                updateStats();
+                updateProgress();
+                setTimeout(() => {
+                    nextLevel();
+                }, 2000);
+            } else {
+                document.getElementById('socialError').style.display = 'block';
+                document.getElementById('socialSuccess').style.display = 'none';
+            }
+        }
+
+        function checkCookie() {
+            const answer = document.getElementById('cookieAnswer').value.toLowerCase();
+            
+            if (answer === 'admin' || answer === 'administrator') {
+                document.getElementById('cookieRole').textContent = answer;
+                document.getElementById('cookieRole').style.color = '#00ff41';
+                document.getElementById('cookieSuccess').style.display = 'block';
+                document.getElementById('cookieError').style.display = 'none';
+                addToken('admin');
+                levelsCompleted++;
+                vulnerabilitiesFound++;
+                updateStats();
+                updateProgress();
+                setTimeout(() => {
+                    nextLevel();
+                }, 2000);
+            } else {
+                document.getElementById('cookieError').style.display = 'block';
+                document.getElementById('cookieSuccess').style.display = 'none';
+            }
+        }
+
+        function checkFinal() {
+            const answer = document.getElementById('finalAnswer').value.toLowerCase().replace(/\s+/g, '');
+            const correctAnswer = 'password123dumpsocial_master_2024admin';
+            
+            if (answer === correctAnswer) {
+                gameActive = false;
+                document.getElementById('level5').style.display = 'none';
+                document.getElementById('completionScreen').style.display = 'block';
+                levelsCompleted++;
+                updateStats();
+                updateProgress();
+            } else {
+                document.getElementById('finalError').style.display = 'block';
+            }
+        }
+
+        function hideCookieBanner() {
+            document.getElementById('cookieBanner').style.display = 'none';
+        }
+
+        function resetGame() {
+            currentLevel = 1;
+            gameActive = true;
+            tokens = [];
+            levelsCompleted = 0;
+            vulnerabilitiesFound = 0;
+            hintsUsed = 0;
+            
+            // Reset all levels
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`level${i}`).classList.remove('active');
+                document.querySelectorAll('.success-message, .error-message').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('input').forEach(input => input.value = '');
+            }
+            
+            document.getElementById('level1').classList.add('active');
+            document.getElementById('completionScreen').style.display = 'none';
+            document.getElementById('cookieBanner').style.display = 'none';
+            document.getElementById('tokensList').innerHTML = 'No tokens collected yet...';
+            document.getElementById('cookieRole').textContent = 'guest';
+            document.getElementById('cookieRole').style.color = '#ff0040';
+            
+            // Reset hint button
+            document.getElementById('hintButton').disabled = false;
+            document.getElementById('hintButton').textContent = '🔍 REQUEST INTEL';
+            document.getElementById('hintButton').style.opacity = '1';
+            
+            updateStats();
+            updateProgress();
+            updateSecurityTip(1);
+            updateHintCounter();
+        }
+
+        // Initialize game
+        window.onload = function() {
+            updateStats();
+            updateProgress();
+            updateSecurityTip(1);
+            updateHintCounter();
+        };
+    </script>
+</body>
+</html>
