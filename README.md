@@ -1,4 +1,5 @@
 # hacknight
 
-Bombini Gusini is in our game its about drive its
-chimpanzini bananini wa wa wa monke monke monke
+We have a goose in our game
+
+Creators: Yeonjun Lee, Ethan Filip, Vivan Jaiswal, Neev Lodha
